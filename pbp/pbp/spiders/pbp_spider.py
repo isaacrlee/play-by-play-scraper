@@ -1,7 +1,6 @@
 import scrapy
 
-
-class PBPSpider(scrapy.Spider):
+class PbpSpider(scrapy.Spider):
     name = "pbp"
 
     start_urls = [

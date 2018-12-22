@@ -9,7 +9,7 @@ from scrapy import signals
 import re
 
 
-class TutorialSpiderMiddleware(object):
+class PbpSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
     # passed objects.
@@ -34,6 +34,8 @@ class TutorialSpiderMiddleware(object):
         d = []
         pbp = list(result)
         info = pbp[0]
+        # info['away_team'] = team_ids[info['away_team']]
+        # info['home_team'] = team_ids[info['home_team']]
         pitcher_against = {
             info['away_team']: info['home_starting_pitcher'],
             info['home_team']: info['away_starting_pitcher']
@@ -132,7 +134,7 @@ class TutorialSpiderMiddleware(object):
         spider.logger.info('Spider opened: %s' % spider.name)
 
 
-class TutorialDownloaderMiddleware(object):
+class PBPDownloaderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
     # passed objects.

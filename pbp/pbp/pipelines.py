@@ -6,7 +6,6 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 
-class PBPPipeline(object):
+class PbpPipeline(object):
     def process_item(self, item, spider):
-        print('Hello')
         return item
