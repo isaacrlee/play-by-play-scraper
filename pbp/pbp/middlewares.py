@@ -31,6 +31,11 @@ class PbpSpiderMiddleware(object):
     def process_spider_output(self, response, result, spider):
         # Called with the results returned from the Spider, after
         # it has processed the response.
+        if spider.name == 'team':
+            for r in result:
+                yield r
+            return
+
         d = []
         pbp = list(result)
         info = pbp[0]

@@ -8,4 +8,6 @@
 
 class PbpPipeline(object):
     def process_item(self, item, spider):
+        if spider.name == 'team':
+            item.save()
         return item

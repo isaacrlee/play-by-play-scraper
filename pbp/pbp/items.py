@@ -5,16 +5,10 @@
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/items.html
 
-import scrapy
+from scrapy.item import Field
+from scrapy_djangoitem import DjangoItem
 
-class Game(scrapy.Item):
-    home_team_id = scrapy.Field()
-    away_team_id = scrapy.Field()
-    date = scrapy.Field()
+from pbpdata.models import Team
 
-class Play(scrapy.Item):
-    offense = scrapy.Field()
-    pitcher = scrapy.Field()
-    player = scrapy.Field()
-    pa_result = scrapy.Field()
-    batted_ball_location = scrapy.Field()
+class TeamItem(DjangoItem):
+    django_model = Team
