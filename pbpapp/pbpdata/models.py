@@ -4,61 +4,94 @@ from django.db import models
 
 
 class Team (models.Model):
-    # tbc_id
-    team_name = models.CharField(max_length=50)
+    tbc_team_id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=50)
     nickname = models.CharField(max_length=50)
     conference = models.CharField(max_length=50)
 
 
 class Player(models.Model):
+    L = 'LEFT'
+    S = 'SWITCH'
+    R = 'RIGHT'
     HANDEDNESS_CHOICES = (
-        ('L', 'Left'),
-        ('S' 'Switch'),
-        ('R', 'Right')
+        (L, 'Left'),
+        (S, 'Switch'),
+        (R, 'Right'),
     )
+    tbc_player_id = models.IntegerField(primary_key=True)
     pitcher_handedness = models.CharField(
         max_length=1, choices=HANDEDNESS_CHOICES)
     batter_handedness = models.CharField(
         max_length=1, choices=HANDEDNESS_CHOICES)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    team = models.ForeignKey(Team, on_delete=models.SET_NULL)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
 
 
 class Game (models.Model):
     date = models.DateTimeField()
-    home_team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    away_team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    home_team = models.ForeignKey(
+        Team, related_name='home_team', on_delete=models.CASCADE)
+    away_team = models.ForeignKey(
+        Team, related_name='away_team', on_delete=models.CASCADE)
 
 
 class Play (models.Model):
+    SINGLE = '1B'
+    DOUBLE = '2B'
+    TRIPLE = '3B'
+    HOMERUN = 'HR'
+    GROUNDOUT = 'G'
+    LINEOUT = 'L'
+    FLYOUT = 'F'
+    ERROR = 'E'
+    STRIKEOUT = 'K'
+    WALK = 'BB'
+    HITBYPITCH = 'HBP'
+
+    PITCHER = 'P'
+    FIRSTBASE = '1B'
+    SECONDBASE = '2B'
+    THIRDBASE = '3B'
+    SHORTSTOP = 'SS'
+    LEFTFIELD = 'LF'
+    CENTERFIELD = 'CF'
+    RIGHTFIELD = 'RF'
+    LEFTCENTER = 'LC'
+    RIGHTCENTER = 'RC'
+    LEFTSIDE = 'LS'
+    MIDDLE = 'M'
+    RIGHTSIDE = 'RS'
+
     RESULT_CHOICES = (
-        ('1B', 'Single'),
-        ('2B' 'Double'),
-        ('3B', 'Triple'),
-        ('HR', 'Home Run'),
-        ('G', 'Ground Out'),
-        ('L', 'Line Out'),
-        ('F', 'Fly Out'),
-        ('E', 'Error'),
-        ('K', 'Strike Out'),
-        ('BB', 'Walk'),
-        ('HBP', 'Hit By Pitch')
+        (SINGLE, 'Single'),
+        (DOUBLE, 'Double'),
+        (TRIPLE, 'Triple'),
+        (HOMERUN, 'Home Run'),
+        (GROUNDOUT, 'Ground Out'),
+        (LINEOUT, 'Line Out'),
+        (FLYOUT, 'Fly Out'),
+        (ERROR, 'Error'),
+        (STRIKEOUT, 'Strike Out'),
+        (WALK, 'Walk'),
+        (HITBYPITCH, 'Hit By Pitch'),
     )
+
     LOCATION_CHOICES = (
-        ('P', 'Pitcher'),
-        ('1B', 'First Base'),
-        ('2B', 'Second Base'),
-        ('3B', 'Third Base'),
-        ('SS', 'Shortstop'),
-        ('LF', 'Left Field'),
-        ('CF', 'Center Field'),
-        ('RF', 'Right Field'),
-        ('LC', 'Left Center'),
-        ('RC', 'Right Center'),
-        ('LS', 'Left Side'),
-        ('M', 'Middle'),
-        ('RS', 'Right Side')
+        (PITCHER, 'Pitcher'),
+        (FIRSTBASE, 'First Base'),
+        (SECONDBASE, 'Second Base'),
+        (THIRDBASE, 'Third Base'),
+        (SHORTSTOP, 'Shortstop'),
+        (LEFTFIELD, 'Left Field'),
+        (CENTERFIELD, 'Center Field'),
+        (RIGHTFIELD, 'Right Field'),
+        (LEFTCENTER, 'Left Center'),
+        (RIGHTCENTER, 'Right Center'),
+        (LEFTSIDE, 'Left Side'),
+        (MIDDLE, 'Middle'),
+        (RIGHTSIDE, 'Right Side'),
     )
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     play_text = models.CharField(max_length=200)
