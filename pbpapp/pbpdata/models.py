@@ -9,21 +9,31 @@ class Team (models.Model):
     nickname = models.CharField(max_length=50)
     conference = models.CharField(max_length=50)
 
+    def __repr__ (self):
+        return self.name
+
+    def __str__ (self):
+        return self.name
+
+
+
 
 class Player(models.Model):
-    L = 'LEFT'
-    S = 'SWITCH'
-    R = 'RIGHT'
+    L = 'L'
+    S = 'S'
+    R = 'R'
+    U = 'U'
     HANDEDNESS_CHOICES = (
         (L, 'Left'),
         (S, 'Switch'),
         (R, 'Right'),
+        (U, 'Unknown')
     )
     tbc_player_id = models.IntegerField(primary_key=True)
     pitcher_handedness = models.CharField(
-        max_length=1, choices=HANDEDNESS_CHOICES)
+        max_length=10, choices=HANDEDNESS_CHOICES, null=True)
     batter_handedness = models.CharField(
-        max_length=1, choices=HANDEDNESS_CHOICES)
+        max_length=10, choices=HANDEDNESS_CHOICES, null=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
@@ -68,35 +78,35 @@ class Play (models.Model):
         (SINGLE, 'Single'),
         (DOUBLE, 'Double'),
         (TRIPLE, 'Triple'),
-        (HOMERUN, 'Home Run'),
-        (GROUNDOUT, 'Ground Out'),
-        (LINEOUT, 'Line Out'),
-        (FLYOUT, 'Fly Out'),
+        (HOMERUN, 'HomeRun'),
+        (GROUNDOUT, 'GroundOut'),
+        (LINEOUT, 'LineOut'),
+        (FLYOUT, 'FlyOut'),
         (ERROR, 'Error'),
-        (STRIKEOUT, 'Strike Out'),
+        (STRIKEOUT, 'StrikeOut'),
         (WALK, 'Walk'),
-        (HITBYPITCH, 'Hit By Pitch'),
+        (HITBYPITCH, 'HitByPitch'),
     )
 
     LOCATION_CHOICES = (
         (PITCHER, 'Pitcher'),
-        (FIRSTBASE, 'First Base'),
-        (SECONDBASE, 'Second Base'),
-        (THIRDBASE, 'Third Base'),
+        (FIRSTBASE, 'FirstBase'),
+        (SECONDBASE, 'SecondBase'),
+        (THIRDBASE, 'ThirdBase'),
         (SHORTSTOP, 'Shortstop'),
-        (LEFTFIELD, 'Left Field'),
-        (CENTERFIELD, 'Center Field'),
-        (RIGHTFIELD, 'Right Field'),
-        (LEFTCENTER, 'Left Center'),
-        (RIGHTCENTER, 'Right Center'),
-        (LEFTSIDE, 'Left Side'),
+        (LEFTFIELD, 'LeftField'),
+        (CENTERFIELD, 'CenterField'),
+        (RIGHTFIELD, 'RightField'),
+        (LEFTCENTER, 'LeftCenter'),
+        (RIGHTCENTER, 'RightCenter'),
+        (LEFTSIDE, 'LeftSide'),
         (MIDDLE, 'Middle'),
-        (RIGHTSIDE, 'Right Side'),
+        (RIGHTSIDE, 'RightSide'),
     )
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     play_text = models.CharField(max_length=200)
     offense_team = models.ForeignKey(Team, on_delete=models.CASCADE)
     pitcher = models.ForeignKey(Player, on_delete=models.CASCADE)
-    pa_result = models.CharField(max_length=3, choices=RESULT_CHOICES)
+    pa_result = models.CharField(max_length=25, choices=RESULT_CHOICES, null=True)
     batted_ball_location = models.CharField(
-        max_length=2, choices=LOCATION_CHOICES)
+        max_length=25, choices=LOCATION_CHOICES, null=True)

@@ -9,5 +9,6 @@
 class PbpPipeline(object):
     def process_item(self, item, spider):
         if spider.name == 'team':
+            item.full_clean()
             item.save()
         return item

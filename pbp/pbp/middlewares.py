@@ -6,6 +6,7 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from pbp.items import PlayerItem
 import re
 
 
@@ -31,7 +32,27 @@ class PbpSpiderMiddleware(object):
     def process_spider_output(self, response, result, spider):
         # Called with the results returned from the Spider, after
         # it has processed the response.
-        if spider.name == 'team':
+        if spider.name == 'player':
+            for r in result:
+                pattern = re.compile(r'(?<=-)\w')
+                search = re.search(pattern, r['handedness'])
+                ph = search.group(0) if search else 'U'
+
+                pattern = re.compile(r'\w(?=-)')
+                search = re.search(pattern, r['handedness'])
+                bh = search.group(0) if search else 'U'
+
+                yield PlayerItem(
+                    tbc_player_id=r['tbc_player_id'],
+                    pitcher_handedness=ph,
+                    batter_handedness=bh,
+                    first_name=r['first_name'],
+                    last_name=r['last_name'],
+                    team=r['team']
+                )
+            return
+
+        if spider.name != 'pbp':
             for r in result:
                 yield r
             return
@@ -103,11 +124,11 @@ class PbpSpiderMiddleware(object):
                 batted_ball_location = match.group(2)
 
             if batted_ball_location:
-        #         print(name, pa_result, batted_ball_location)
+                #         print(name, pa_result, batted_ball_location)
                 play['pa_result'] = pa_result
                 play['batted_ball_location'] = batted_ball_location
             else:
-        #         print(name, pa_result)
+                #         print(name, pa_result)
                 play['pa_result'] = pa_result
 
             name = ''
