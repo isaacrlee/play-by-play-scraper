@@ -8,6 +8,8 @@
 #     https://doc.scrapy.org/en/latest/topics/settings.html
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
+import pyrebase
+from algoliasearch import algoliasearch
 
 BOT_NAME = 'pbp'
 
@@ -65,7 +67,7 @@ SPIDER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'pbp.pipelines.PbpPipeline': 300,
+    'pbp.pipelines.PbpPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -89,11 +91,28 @@ ITEM_PIPELINES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-import sys
-sys.path.append('/Users/isaaclee/Projects/play-by-play-scraper/pbpapp')
+config = {
+    "apiKey": "AIzaSyAIxAM1DTRWL_GpgUnNHmjHGhdbirkklmA",
+    "authDomain": "play-by-play-9b95e.firebaseapp.com",
+    "databaseURL": "https://play-by-play-9b95e.firebaseio.com/",
+    "storageBucket": "play-by-play-9b95e.appspot.com"
+}
 
-import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'pbpapp.settings'
+# FIREBASE
+firebase = pyrebase.initialize_app(config)
 
-import django
-django.setup()
+email = 'admin@admin.com'
+password = 'password'
+
+# Get a reference to the auth service
+auth = firebase.auth()
+
+# Log the user in
+user = auth.sign_in_with_email_and_password(email, password)
+
+# Get a reference to the database service
+db = firebase.database()
+
+# ALGOLIA
+client = algoliasearch.Client("BNBURP768U", '1eabb4bce5a01bc2d44a7539c5c616c6')
+team_index = client.init_index('teams')
