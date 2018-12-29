@@ -319,9 +319,9 @@ class PlayerSpider(scrapy.Spider):
             yield {
                 'tbc_player_id': int(cols[1].css('a::attr(href)')[
                     0].re_first(r'(?<=ID=)\w+')),
-                'first_name': cols[1].css('a::text')[0].re_first(r'^[\w\'.]+'),
+                'first_name': cols[1].css('a::text')[0].re_first(r'^[\w\'\.-]+'),
                 'last_name': cols[1].css('a::text')[
-                    0].re_first(r'(?<= )[\w\']+'),
+                    0].re_first(r'(?<= )[\w\'\.-]+'),
                 'handedness': cols[5].css('::text').extract_first(),
                 'tbc_team_id': tbc_team_id
             }

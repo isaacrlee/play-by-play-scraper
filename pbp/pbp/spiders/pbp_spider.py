@@ -1,4 +1,5 @@
 import scrapy
+import re
 from ..settings import team_index, db
 
 
@@ -55,10 +56,36 @@ class PbpSpider(scrapy.Spider):
                   'https://nusports.com/boxscore.aspx?path=baseball&id=13397']
 
     def parse(self, response):
-        teams = response.css('article.box-score h1 span::text').extract()
+        def parse_starting_pitcher(s):
+            # Remove Win-Loss Record: First Last (W, 1-0) -> First Last
+            pattern = re.compile(r" (\([WLS])")
+            match = re.search(pattern, s)
+            if bool(match):
+                s = s[:s.index(match.group(0))]
+            return s
 
-        away_team = team_index.search(teams[0])['hits'][0]['tbc_team_id']
-        home_team = team_index.search(teams[1])['hits'][0]['tbc_team_id']
+        teams = response.css('article.box-score h1 span::text').re(
+            r'(^[\w\s]+|(?<=# \d\d )[\w\s]+|(?<=# \d )[\w\s]+)')
+
+        try:
+            if teams[0] == 'UIC':
+                away_team = team_index.search(
+                    'Illinois-Chicago')['hits'][0]['tbc_team_id']
+            else:
+                away_team = team_index.search(
+                    teams[0])['hits'][0]['tbc_team_id']
+        except:
+            raise Exception('Away Team Not Found {}'.format(teams[0]))
+
+        try:
+            if teams[1] == 'UIC':
+                home_team = team_index.search(
+                    'Illinois-Chicago')['hits'][0]['tbc_team_id']
+            else:
+                home_team = team_index.search(
+                    teams[1])['hits'][0]['tbc_team_id']
+        except:
+            raise Exception('Home Team Not Found {}'.format(teams[1]))
 
         team_ids = {
             teams[0]: away_team,
@@ -77,9 +104,19 @@ class PbpSpider(scrapy.Spider):
         away_pitching_statistics_table = pitching_statistics.css('table')[0]
         home_pitching_statistics_table = pitching_statistics.css('table')[1]
 
+        away_starting_pitcher_css = 'tbody th a::text' if away_pitching_statistics_table.css(
+            'tbody th a') else 'tbody th::text'
+        home_starting_pitcher_css = 'tbody th a::text' if home_pitching_statistics_table.css(
+            'tbody th a') else 'tbody th::text'
+
+        away_starting_pitcher = parse_starting_pitcher(away_pitching_statistics_table.css(
+            away_starting_pitcher_css).extract_first()).strip()
+        home_starting_pitcher = parse_starting_pitcher(home_pitching_statistics_table.css(
+            home_starting_pitcher_css).extract_first()).strip()
+
         yield {
-            'away_starting_pitcher': away_pitching_statistics_table.css('tbody th a::text').re_first(r'^(\w+,? \w+)') if away_pitching_statistics_table.css('tbody th a') else away_pitching_statistics_table.css('tbody th::text').re_first(r'^(\w+,? \w+)'),
-            'home_starting_pitcher': home_pitching_statistics_table.css('tbody th a::text').re_first(r'^(\w+,? \w+)') if home_pitching_statistics_table.css('tbody th a') else home_pitching_statistics_table.css('tbody th::text').re_first(r'^(\w+,? \w+)'),
+            'away_starting_pitcher': away_starting_pitcher,
+            'home_starting_pitcher': home_starting_pitcher,
             'away_team': away_team,
             'home_team': home_team,
             'players':  players
@@ -87,7 +124,7 @@ class PbpSpider(scrapy.Spider):
 
         for half_inning in response.css('div#inning-all table.play-by-play'):
             offense_team = team_ids[half_inning.css(
-                'caption::text').re_first(r'^\w+')]
+                'caption::text').re_first(r'^[\w\s]+(?= - )')]
             for play in half_inning.css('th[scope=row]::text').extract():
                 yield {
                     'offense_team': offense_team,

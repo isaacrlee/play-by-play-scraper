@@ -12,7 +12,7 @@ import pyrebase
 from algoliasearch import algoliasearch
 
 BOT_NAME = 'pbp'
-
+LOG_LEVEL = 'INFO'
 SPIDER_MODULES = ['pbp.spiders']
 NEWSPIDER_MODULE = 'pbp.spiders'
 
