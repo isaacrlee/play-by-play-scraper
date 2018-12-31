@@ -6,6 +6,7 @@ from ..settings import team_index, db
 class PbpSpider(scrapy.Spider):
     name = "pbp"
 
+    # CUSTOM: Northwestern Games
     start_urls = ['https://nusports.com/boxscore.aspx?path=baseball&id=13350',
                   'https://nusports.com/boxscore.aspx?path=baseball&id=14097',
                   'https://nusports.com/boxscore.aspx?path=baseball&id=13351',
@@ -56,17 +57,10 @@ class PbpSpider(scrapy.Spider):
                   'https://nusports.com/boxscore.aspx?path=baseball&id=13397']
 
     def parse(self, response):
-        def parse_starting_pitcher(s):
-            # Remove Win-Loss Record: First Last (W, 1-0) -> First Last
-            pattern = re.compile(r" (\([WLS])")
-            match = re.search(pattern, s)
-            if bool(match):
-                s = s[:s.index(match.group(0))]
-            return s
-
         teams = response.css('article.box-score h1 span::text').re(
             r'(^[\w\s]+|(?<=# \d\d )[\w\s]+|(?<=# \d )[\w\s]+)')
 
+        # CUSTOM: Searching for UIC doesn't return Illinois-Chicago
         try:
             if teams[0] == 'UIC':
                 away_team = team_index.search(
@@ -109,9 +103,9 @@ class PbpSpider(scrapy.Spider):
         home_starting_pitcher_css = 'tbody th a::text' if home_pitching_statistics_table.css(
             'tbody th a') else 'tbody th::text'
 
-        away_starting_pitcher = parse_starting_pitcher(away_pitching_statistics_table.css(
+        away_starting_pitcher = PbpSpider.parse_starting_pitcher(away_pitching_statistics_table.css(
             away_starting_pitcher_css).extract_first()).strip()
-        home_starting_pitcher = parse_starting_pitcher(home_pitching_statistics_table.css(
+        home_starting_pitcher = PbpSpider.parse_starting_pitcher(home_pitching_statistics_table.css(
             home_starting_pitcher_css).extract_first()).strip()
 
         yield {
@@ -130,3 +124,11 @@ class PbpSpider(scrapy.Spider):
                     'offense_team': offense_team,
                     'play': play
                 }
+    @staticmethod
+    def parse_starting_pitcher(s):
+            # Remove Win-Loss Record: First Last (W, 1-0) -> First Last
+            pattern = re.compile(r" (\([WLS])")
+            match = re.search(pattern, s)
+            if bool(match):
+                s = s[:s.index(match.group(0))]
+            return s

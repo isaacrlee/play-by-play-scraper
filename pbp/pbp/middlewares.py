@@ -53,171 +53,13 @@ class PbpSpiderMiddleware(object):
             return
 
         elif spider.name == 'pbp':
-            def get_player_id_from_od(first_name, last_name, od):
-                maybe = False
-                for player_id, v in od.items():
-                    if v['last_name'].lower().startswith(last_name.lower()):
-                        maybe = player_id
-                        if first_name:
-                            if v['first_name'].lower().startswith(first_name.lower()):
-                                return player_id
-                        else:
-                            return player_id
-                if maybe:
-                    return maybe
-                raise Exception('Player Not Found: {} {}'.format(
-                    first_name, last_name))
-
-            def get_player_id_from_od_and_string(s, od):
-                try:
-                    name_dict = get_first_and_last_name(s)
-                except:
-                    raise Exception('Bad String: {}'.format(s))
-
-                return get_player_id_from_od(
-                    name_dict['first_name'],
-                    name_dict['last_name'],
-                    od
-                )
-
-            def get_defense_team_from_info(offense_team, info):
-                if offense_team == info['away_team']:
-                    return info['home_team']
-                elif offense_team == info['home_team']:
-                    return info['away_team']
-                raise Exception('offense_team is not away or home team')
-
-            def get_first_and_last_name(s):
-                # Return a dictionary containing a player's first name and last name
-                d = {}
-                if ' ' in s and ',' in s and '.' in s:
-                    # Dunn, J.
-                    pattern = re.compile(r"([\w'-]+), ((?<= )[\w'-]+)")
-                    match = re.match(pattern, s)
-                    if bool(match) and len(match.groups()) == 2:
-                        d['first_name'] = match.group(2)
-                        d['last_name'] = match.group(1)
-                    else:
-                        raise Exception('Names Not Parsed: {} \nPattern: {}'.format(s, 1))
-                elif ' ' in s and ',' in s:
-                    # O'Laughlin, Casey
-                    pattern = re.compile(r"([\w'-]+), ((?<= )[\w'-]+)")
-                    match = re.match(pattern, s)
-                    if bool(match) and len(match.groups()) == 2:
-                        d['first_name'] = match.group(2)
-                        d['last_name'] = match.group(1)
-                    else:
-                        raise Exception('Names Not Parsed: {} \nPattern: {}'.format(s, 2))
-                elif ' ' in s:
-                    # Grant Suponchick
-                    pattern = re.compile(r"([\w'-]+)\.? ([\w'-]+)")
-                    match = re.match(pattern, s)
-                    if bool(match) and len(match.groups()) == 2:
-                        d['first_name'] = match.group(1)
-                        d['last_name'] = match.group(2)
-                    else:
-                        raise Exception('Names Not Parsed: {} \nPattern: {}'.format(s, 3))
-                elif ',' in s:
-                    # Thibodeau,C
-                    pattern = re.compile(r"([\w'-]+),([\w'-]+)")
-                    match = re.match(pattern, s)
-                    if bool(match) and len(match.groups()) == 2:
-                        d['first_name'] = match.group(2)
-                        d['last_name'] = match.group(1)
-                    else:
-                        raise Exception('Names Not Parsed: {} \nPattern: {}'.format(s, 4))
-                else:
-                    d['first_name'] = ''
-                    d['last_name'] = s
-                return d
-
-            def get_result(s):
-                STOLENBASE = 'SB'
-                SINGLE = '1B'
-                DOUBLE = '2B'
-                TRIPLE = '3B'
-                HOMERUN = 'HR'
-                GROUNDOUT = 'G'
-                LINEOUT = 'L'
-                FLYOUT = 'F'
-                ERRORORFIELDERSCHOICE = 'E/FC'
-                STRIKEOUT = 'K'
-                WALK = 'BB'
-                HITBYPITCH = 'HBP'
-                UNKNOWN = 'UNKNOWN'
-
-                results = {
-                    'stole': STOLENBASE,
-                    'singled': SINGLE,
-                    'doubled': DOUBLE,
-                    'tripled': TRIPLE,
-                    'homered': HOMERUN,
-                    'grounded': GROUNDOUT,
-                    'lined': LINEOUT,
-                    'flied': FLYOUT,
-                    'popped': FLYOUT,
-                    'reached': ERRORORFIELDERSCHOICE,
-                    'struck out looking': STRIKEOUT,
-                    'struck out swinging': STRIKEOUT,
-                    'walked': WALK,
-                    'hit by pitch': HITBYPITCH,
-                }
-
-                if s in results:
-                    return results[s]
-
-                return UNKNOWN
-
-            def get_location(s):
-                PITCHER = 'P'
-                FIRSTBASE = '1B'
-                SECONDBASE = '2B'
-                THIRDBASE = '3B'
-                SHORTSTOP = 'SS'
-                LEFTFIELD = 'LF'
-                CENTERFIELD = 'CF'
-                RIGHTFIELD = 'RF'
-                LEFTCENTER = 'LC'
-                RIGHTCENTER = 'RC'
-                LEFTSIDE = 'LS'
-                MIDDLE = 'M'
-                RIGHTSIDE = 'RS'
-                UNKNOWN = 'UNKNOWN'
-
-                locations = {
-                    'p': PITCHER,
-                    '1b': FIRSTBASE,
-                    'first base': FIRSTBASE,
-                    '2b': SECONDBASE,
-                    'second base': SECONDBASE,
-                    '3b': THIRDBASE,
-                    'third base': THIRDBASE,
-                    'ss': SHORTSTOP,
-                    'lf': LEFTFIELD,
-                    'left field': LEFTFIELD,
-                    'cf': CENTERFIELD,
-                    'center field': CENTERFIELD,
-                    'rf': RIGHTFIELD,
-                    'right field': RIGHTFIELD,
-                    'left center': LEFTCENTER,
-                    'right center': RIGHTCENTER,
-                    'left side': LEFTSIDE,
-                    'middle': MIDDLE,
-                    'right side': RIGHTSIDE,
-                }
-
-                if s in locations:
-                    return locations[s]
-
-                return UNKNOWN
-
             pbp = list(result)
             info = pbp[0]
             d = list(filter(lambda a: a['play'] != 'No play.', pbp[1:]))
 
-            info['away_starting_pitcher'] = get_player_id_from_od_and_string(
+            info['away_starting_pitcher'] = PbpSpiderMiddleware.get_player_id_from_od_and_string(
                 info['away_starting_pitcher'], info['players'][info['away_team']])
-            info['home_starting_pitcher'] = get_player_id_from_od_and_string(
+            info['home_starting_pitcher'] = PbpSpiderMiddleware.get_player_id_from_od_and_string(
                 info['home_starting_pitcher'], info['players'][info['home_team']])
 
             pitcher_against = {
@@ -231,44 +73,47 @@ class PbpSpiderMiddleware(object):
                 name_pattern)
             sb_pattern = r"stole"
             so_bb_hbp_pattern = r"(struck out looking|struck out swinging|walked|hit by pitch)"
-            batted_ball_pattern = r"(grounded|lined|flied|popped|reached|singled|doubled|tripled|homered).*(p|1b|2b|3b|ss|lf|cf|rf|left field|center field|right field|first base|second base|third base|left center|right center|left side|middle|right side)\b"
-            dp_pattern = r"(grounded|lined|flied|popped|reached|singled|doubled|tripled|homered).*(?<!to )(p|1b|2b|3b|ss|lf|cf|rf)\b"
+            batted_ball_pattern = r"(grounded|lined|flied|popped|reached|singled|doubled|tripled|homered) (?:out to|up to|to|down the|through the|up the|into double play|on a (?:fielding|throwing) error by) (p|c|1b|2b|3b|ss|lf line|lf|cf|rf line|rf|left field|center field|right field|first base|second base|shortstop|third base|left center|right center|left side|middle|right side)\b"
 
             for play in d:
-                # continues
+                # CUSTOM: Dropped fly balls, null substitutions, and ejections are not parsed
                 if play['play'].startswith('Dropped') or play['play'].startswith('/') or 'ejected' in play['play']:
                     continue
 
-                # add pitcher col
-                play['pitcher'] = pitcher_against[play['offense_team']]
+                # add pitcher_id col
+                play['pitcher_id'] = pitcher_against[play['offense_team']]
 
                 # update pitcher_against
                 match = re.search(pitcher_sub_pattern, play['play'])
                 if bool(match):
-                    defense_team = get_defense_team_from_info(
+                    defense_team = PbpSpiderMiddleware.get_defense_team_from_info(
                         play['offense_team'], info)
                     try:
-                        pitcher_against[play['offense_team']] = get_player_id_from_od_and_string(
+                        pitcher_against[play['offense_team']] = PbpSpiderMiddleware.get_player_id_from_od_and_string(
                             match.group(1), info['players'][defense_team])
                     except:
                         try:
-                            pitcher_against[play['defense_team']] = get_player_id_from_od_and_string(
+                            pitcher_against[play['defense_team']] = PbpSpiderMiddleware.get_player_id_from_od_and_string(
                                 match.group(1), info['players'][play['offense_team']])
                         except:
                             Exception('New Pitcher Not Found')
                     continue
 
-                # catch substitutions
+                # continue substitutions
                 match = re.search(sub_pattern, play['play'])
                 if bool(match):
                     continue
 
-                # add name col
+                # add batter_id col
                 match = re.match(name_pattern, play['play'])
                 if bool(match):
                     try:
-                        play['name'] = get_player_id_from_od_and_string(
+                        play['batter_id'] = PbpSpiderMiddleware.get_player_id_from_od_and_string(
                             match.group(0), info['players'][play['offense_team']])
+
+                        # CUSTOM: plays where the batter is Charlie Bourbon should be Willie Bourbon
+                        if int(play['batter_id']) == 213099:
+                            play['batter_id'] = 201095
                     except Exception as e:
                         print(play['play'])
                         raise e
@@ -276,29 +121,26 @@ class PbpSpiderMiddleware(object):
                     raise Exception('No Name: {}'.format(play['play']))
 
                 # add pa_result col
-                    # stolel bases
+                    # stolen bases
                 match = re.search(sb_pattern, play['play'])
                 if bool(match):
-                    play['pa_result'] = get_result(match.group(0))
+                    play['pa_result'] = PbpSpiderMiddleware.get_result(match.group(0))
 
                     # strike outs, walks, hit by pitches
                 match = re.search(so_bb_hbp_pattern, play['play'])
 
                 if bool(match):
-                    play['pa_result'] = get_result(match.group(0))
+                    play['pa_result'] = PbpSpiderMiddleware.get_result(match.group(0))
 
-                    # ground outs, fly outs, line outs... and locations
+                    # ground outs, fly outs, line outs... and batted_ball_locations
                 match = re.search(batted_ball_pattern, play['play'])
 
                 if bool(match):
-                    play['pa_result'] = get_result(match.group(1))
-                    play['batted_ball_location'] = get_location(match.group(2))
+                    play['pa_result'] = PbpSpiderMiddleware.get_result(match.group(1))
+                    play['batted_ball_location'] = PbpSpiderMiddleware.get_location(match.group(2))
 
-                    # locations for double play
-                match = re.search(dp_pattern, play['play'])
-
-                if bool(match):
-                    play['batted_ball_location'] = get_location(match.group(2))
+                if 'reached' in play['play']:
+                    play['pa_result'] = PbpSpiderMiddleware.get_result('reached')
 
                 yield play
 
@@ -326,6 +168,181 @@ class PbpSpiderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+    @staticmethod
+    def get_player_id_from_od(first_name, last_name, od):
+        maybe = False
+        for player_id, v in od.items():
+            if v['last_name'].lower().startswith(last_name.lower()):
+                maybe = player_id
+                if first_name:
+                    if v['first_name'].lower().startswith(first_name.lower()):
+                        return player_id
+                else:
+                    return player_id
+        if maybe:
+            return maybe
+        raise Exception('Player Not Found: {} {}'.format(
+            first_name, last_name))
+
+    @staticmethod
+    def get_player_id_from_od_and_string(s, od):
+        try:
+            name_dict = PbpSpiderMiddleware.get_first_and_last_name(s)
+        except:
+            raise Exception('Bad String: {}'.format(s))
+
+        return PbpSpiderMiddleware.get_player_id_from_od(
+            name_dict['first_name'],
+            name_dict['last_name'],
+            od
+        )
+
+    @staticmethod
+    def get_defense_team_from_info(offense_team, info):
+        if offense_team == info['away_team']:
+            return info['home_team']
+        elif offense_team == info['home_team']:
+            return info['away_team']
+        raise Exception('offense_team is not away or home team')
+
+    @staticmethod
+    def get_first_and_last_name(s):
+        # Return a dictionary containing a player's first name and last name
+        d = {}
+        if ' ' in s and ',' in s and '.' in s:
+            # Dunn, J.
+            pattern = re.compile(r"([\w'-]+), ((?<= )[\w'-]+)")
+            match = re.match(pattern, s)
+            if bool(match) and len(match.groups()) == 2:
+                d['first_name'] = match.group(2)
+                d['last_name'] = match.group(1)
+            else:
+                raise Exception(
+                    'Names Not Parsed: {} \nPattern: {}'.format(s, 1))
+        elif ' ' in s and ',' in s:
+            # O'Laughlin, Casey
+            pattern = re.compile(r"([\w'-]+), ((?<= )[\w'-]+)")
+            match = re.match(pattern, s)
+            if bool(match) and len(match.groups()) == 2:
+                d['first_name'] = match.group(2)
+                d['last_name'] = match.group(1)
+            else:
+                raise Exception(
+                    'Names Not Parsed: {} \nPattern: {}'.format(s, 2))
+        elif ' ' in s:
+            # Grant Suponchick
+            pattern = re.compile(r"([\w'-]+)\.? ([\w'-]+)")
+            match = re.match(pattern, s)
+            if bool(match) and len(match.groups()) == 2:
+                d['first_name'] = match.group(1)
+                d['last_name'] = match.group(2)
+            else:
+                raise Exception(
+                    'Names Not Parsed: {} \nPattern: {}'.format(s, 3))
+        elif ',' in s:
+            # Thibodeau,C
+            pattern = re.compile(r"([\w'-]+),([\w'-]+)")
+            match = re.match(pattern, s)
+            if bool(match) and len(match.groups()) == 2:
+                d['first_name'] = match.group(2)
+                d['last_name'] = match.group(1)
+            else:
+                raise Exception(
+                    'Names Not Parsed: {} \nPattern: {}'.format(s, 4))
+        else:
+            d['first_name'] = ''
+            d['last_name'] = s
+        return d
+
+    @staticmethod
+    def get_result(s):
+        STOLENBASE = 'SB'
+        SINGLE = '1B'
+        DOUBLE = '2B'
+        TRIPLE = '3B'
+        HOMERUN = 'HR'
+        GROUNDOUT = 'G'
+        LINEOUT = 'L'
+        FLYOUT = 'F'
+        ERRORORFIELDERSCHOICE = 'E/FC'
+        STRIKEOUT = 'K'
+        WALK = 'BB'
+        HITBYPITCH = 'HBP'
+        UNKNOWN = 'UNKNOWN'
+
+        results = {
+            'stole': STOLENBASE,
+            'singled': SINGLE,
+            'doubled': DOUBLE,
+            'tripled': TRIPLE,
+            'homered': HOMERUN,
+            'grounded': GROUNDOUT,
+            'lined': LINEOUT,
+            'flied': FLYOUT,
+            'popped': FLYOUT,
+            'reached': ERRORORFIELDERSCHOICE,
+            'struck out looking': STRIKEOUT,
+            'struck out swinging': STRIKEOUT,
+            'walked': WALK,
+            'hit by pitch': HITBYPITCH,
+        }
+
+        if s in results:
+            return results[s]
+
+        return UNKNOWN
+
+    @staticmethod
+    def get_location(s):
+        PITCHER = 'P'
+        CATCHER = 'C'
+        FIRSTBASE = '1B'
+        SECONDBASE = '2B'
+        THIRDBASE = '3B'
+        SHORTSTOP = 'SS'
+        LEFTFIELD = 'LF'
+        CENTERFIELD = 'CF'
+        RIGHTFIELD = 'RF'
+        LEFTFIELDLINE = 'LFL'
+        LEFTCENTER = 'LC'
+        RIGHTCENTER = 'RC'
+        RIGHTFIELDLINE = 'RFL'
+        LEFTSIDE = 'LS'
+        MIDDLE = 'M'
+        RIGHTSIDE = 'RS'
+        UNKNOWN = 'UNKNOWN'
+
+        locations = {
+            'p': PITCHER,
+            'c': CATCHER,
+            '1b': FIRSTBASE,
+            'first base': FIRSTBASE,
+            '2b': SECONDBASE,
+            'second base': SECONDBASE,
+            '3b': THIRDBASE,
+            'third base': THIRDBASE,
+            'ss': SHORTSTOP,
+            'lf': LEFTFIELD,
+            'left field': LEFTFIELD,
+            'cf': CENTERFIELD,
+            'center field': CENTERFIELD,
+            'rf': RIGHTFIELD,
+            'right field': RIGHTFIELD,
+            'lf line': LEFTFIELDLINE,
+            'left center': LEFTCENTER,
+            'right center': RIGHTCENTER,
+            'rf line': RIGHTFIELDLINE,
+            'left side': LEFTSIDE,
+            'middle': MIDDLE,
+            'right side': RIGHTSIDE,
+        }
+
+        if s in locations:
+            return locations[s]
+
+        return UNKNOWN
+
 
 
 class PBPDownloaderMiddleware(object):
