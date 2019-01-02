@@ -80,6 +80,9 @@ class PbpSpiderMiddleware(object):
                 if play['play'].startswith('Dropped') or play['play'].startswith('/') or 'ejected' in play['play']:
                     continue
 
+                # add game_id col
+                play['game_id'] = info['game_id']
+
                 # add pitcher_id col
                 play['pitcher_id'] = pitcher_against[play['offense_team']]
 

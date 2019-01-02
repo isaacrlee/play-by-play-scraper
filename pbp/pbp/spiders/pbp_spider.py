@@ -1,60 +1,15 @@
 import scrapy
 import re
+from ..northwestern_games import northwestern_games
 from ..settings import team_index, db
+from urllib.parse import urlparse, parse_qs
 
 
 class PbpSpider(scrapy.Spider):
     name = "pbp"
 
     # CUSTOM: Northwestern Games
-    start_urls = ['https://nusports.com/boxscore.aspx?path=baseball&id=13350',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=14097',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13351',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13352',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13353',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13354',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13355',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=15104',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13356',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13357',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13359',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13360',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13361',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13362',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13363',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13364',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13365',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13366',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13367',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13368',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13369',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13371',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13372',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13373',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13374',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13375',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13376',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13377',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13378',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13379',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13380',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13381',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13382',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13383',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13384',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13385',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13386',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13387',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13388',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13389',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13390',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13391',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13392',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13393',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13394',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13395',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13396',
-                  'https://nusports.com/boxscore.aspx?path=baseball&id=13397']
+    start_urls = northwestern_games
 
     def parse(self, response):
         teams = response.css('article.box-score h1 span::text').re(
@@ -109,6 +64,7 @@ class PbpSpider(scrapy.Spider):
             home_starting_pitcher_css).extract_first()).strip()
 
         yield {
+            'game_id': PbpSpider.get_game_id(response.request.url),
             'away_starting_pitcher': away_starting_pitcher,
             'home_starting_pitcher': home_starting_pitcher,
             'away_team': away_team,
@@ -132,3 +88,15 @@ class PbpSpider(scrapy.Spider):
             if bool(match):
                 s = s[:s.index(match.group(0))]
             return s
+
+    @staticmethod
+    def get_game_id(url):
+        o = urlparse(url)
+        try:
+            params = parse_qs(o.query)
+            try:
+                return int(params['id'][0])
+            except:
+                raise Exception('No id: {}'.format(params))
+        except:
+            raise Exception('No Query: {}'.format(o))
