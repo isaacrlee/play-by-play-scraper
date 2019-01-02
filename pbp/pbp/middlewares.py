@@ -326,6 +326,7 @@ class PbpSpiderMiddleware(object):
             '3b': THIRDBASE,
             'third base': THIRDBASE,
             'ss': SHORTSTOP,
+            'shortstop': SHORTSTOP
             'lf': LEFTFIELD,
             'left field': LEFTFIELD,
             'cf': CENTERFIELD,

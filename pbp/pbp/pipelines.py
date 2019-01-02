@@ -15,5 +15,5 @@ class PbpPipeline(object):
             # db.child("players").child(item['tbc_player_id']).set(item)
             db.child("players").child(item['tbc_player_id']).update(item)
         if spider.name == 'pbp':
-            db.child("plays").push(item)
+            # db.child("plays").push(item)
         return item
