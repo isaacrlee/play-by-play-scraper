@@ -84,6 +84,11 @@ Note: There may be a couple of exceptions if this spider is run on the given `no
 After this spider completes, the play-by-play data can be accessed using the Firebase client of your choice or by loading the `pbp.json` file into the data analysis software of your choice.
 (I prefer Pyrebase for Python 3 and Jupyter notebooks).
 
+Example Play Data:
+```
+{"offense_team": 20037, "play": "Dickey grounded out to ss.", "game_id": 13355, "pitcher_id": "203021", "batter_id": "201091", "pa_result": "G", "batted_ball_location": "SS"}
+```
+
 ### Using A Different Team's Dataset
 This scraper is optimized for pages using the SIDEARM Sports template and has only been tested on Northwestern Baseball games.
 
