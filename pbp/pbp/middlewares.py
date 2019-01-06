@@ -6,7 +6,6 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-from .settings import db
 import re
 
 
@@ -326,7 +325,7 @@ class PbpSpiderMiddleware(object):
             '3b': THIRDBASE,
             'third base': THIRDBASE,
             'ss': SHORTSTOP,
-            'shortstop': SHORTSTOP
+            'shortstop': SHORTSTOP,
             'lf': LEFTFIELD,
             'left field': LEFTFIELD,
             'cf': CENTERFIELD,

@@ -8,8 +8,9 @@
 #     https://doc.scrapy.org/en/latest/topics/settings.html
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-import pyrebase
+from .keys import algolia_app_id, algolia_api_key, config, email, password
 from algoliasearch import algoliasearch
+import pyrebase
 
 BOT_NAME = 'pbp'
 LOG_LEVEL = 'INFO'
@@ -91,18 +92,10 @@ ITEM_PIPELINES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-config = {
-    "apiKey": "AIzaSyAIxAM1DTRWL_GpgUnNHmjHGhdbirkklmA",
-    "authDomain": "play-by-play-9b95e.firebaseapp.com",
-    "databaseURL": "https://play-by-play-9b95e.firebaseio.com/",
-    "storageBucket": "play-by-play-9b95e.appspot.com"
-}
+client = algoliasearch.Client(algolia_app_id, algolia_api_key)
+team_index = client.init_index('teams')
 
-# FIREBASE
 firebase = pyrebase.initialize_app(config)
-
-email = 'admin@admin.com'
-password = 'password'
 
 # Get a reference to the auth service
 auth = firebase.auth()
@@ -112,7 +105,3 @@ user = auth.sign_in_with_email_and_password(email, password)
 
 # Get a reference to the database service
 db = firebase.database()
-
-# ALGOLIA
-client = algoliasearch.Client("BNBURP768U", '1eabb4bce5a01bc2d44a7539c5c616c6')
-team_index = client.init_index('teams')

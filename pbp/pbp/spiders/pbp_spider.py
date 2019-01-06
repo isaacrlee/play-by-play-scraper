@@ -1,7 +1,7 @@
 import scrapy
 import re
 from ..northwestern_games import northwestern_games
-from ..settings import team_index, db
+from ..settings import db, team_index
 from urllib.parse import urlparse, parse_qs
 
 
