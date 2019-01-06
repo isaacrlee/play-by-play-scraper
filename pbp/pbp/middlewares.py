@@ -115,7 +115,7 @@ class PbpSpiderMiddleware(object):
 
                         # CUSTOM: plays where the batter is Charlie Bourbon should be Willie Bourbon
                         if int(play['batter_id']) == 213099:
-                            play['batter_id'] = 201095
+                            str(play['batter_id']) = 201095
                     except Exception as e:
                         print(play['play'])
                         raise e
