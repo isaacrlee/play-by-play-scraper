@@ -108,7 +108,7 @@ If run on a different set of games, it is extremely likely that the regex expres
 * `Unknown command: crawl`: Need to change into the `pbp` directory
 
 ### Known Issues
-* Name parsing not 100% accurate as it relies on a lot of regular expressions and unambiguos play-by-play data.
+* Name parsing not 100% accurate as it relies on a lot of regular expressions and unambiguous play-by-play data.
 * The batted ball location for a fielder's choice is not recorded. This is due to difficulties with regular expressions
 * Games against non-D1 opponents is not recorded. This can be fixed by adapting the `team` spider to scrape all teams info, not just D1.
 * Plays such as dropped fly balls and ejections are skipped.
