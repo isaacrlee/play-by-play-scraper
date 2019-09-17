@@ -73,7 +73,7 @@ scrapy crawl player -o players.json
 ```
 This will store the scraping output in `players.json`
 
-Finally, fun the pbp (play-by-play) spider:
+Finally, run the pbp (play-by-play) spider:
 
 ```
 scrapy crawl pbp -o pbp.json
