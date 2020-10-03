@@ -118,3 +118,6 @@ If run on a different set of games, it is extremely likely that the regex expres
 * [Firebase](https://firebase.google.com)
 * [Pyrebase](https://github.com/thisbejim/Pyrebase)
 * [Scrapy](https://scrapy.org/)
+
+### Other Sports Data Projects
+Check out other sports data projects I've built [here](https://github.com/isaacrlee/sports-data-projects/blob/main/README.md)
